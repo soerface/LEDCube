@@ -1,4 +1,4 @@
-#define F_CPU 10000
+#define F_CPU 1000000
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -8,7 +8,7 @@ class LEDCube {
     public:
         LEDCube();
         int Draw();
-        int SetPixel(int x, int y, int z);
+        int SetPixel(int x, int y, int z, bool state);
 
     private:
         uint8_t data[5][5] = {{0},{0},{0},{0},{0}};
@@ -36,8 +36,12 @@ int LEDCube::Draw() {
     return 0;
 }
 
-int LEDCube::SetPixel(int x, int y, int z) {
-    data[y][x] |= 1 << z;
+int LEDCube::SetPixel(int x, int y, int z, bool state=true) {
+    if (state) {
+        data[y][x] |= 1 << z;
+    } else {
+        data[y][x] &= ~(1 << z);
+    }
     return 0;
 }
 
@@ -53,8 +57,11 @@ int main(void) {
 
     while(1) {
         cube.SetPixel(0, 0, 3);
+        cube.SetPixel(0, 0, 4);
+        cube.SetPixel(0, 0, 2);
         cube.SetPixel(4, 4, 1);
         cube.SetPixel(2, 1, 4);
+        cube.SetPixel(0, 0, 3, false);
         cube.Draw();
     }
 
