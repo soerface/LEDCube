@@ -1,49 +1,8 @@
-#define F_CPU 1000000
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
-class LEDCube {
-
-    public:
-        LEDCube();
-        int Draw();
-        int SetPixel(int x, int y, int z, bool state);
-
-    private:
-        uint8_t data[5][5] = {{0},{0},{0},{0},{0}};
-
-};
-
-LEDCube::LEDCube() {
-    DDRA = 0x1F;
-    DDRB = 0x1F;
-    DDRD = 0x1F;
-}
-
-int LEDCube::Draw() {
-    for (int Layer=0; Layer<5; Layer++) {
-        // generate pattern for one layer
-        for (int Row=0; Row<5; Row++) {
-            PORTD = 1 << Row;
-            PORTA = data[Layer][Row];
-        }
-        PORTB = 1 << Layer;
-        _delay_ms(2);
-        PORTB = 0x00;
-    }
-    PORTB = 0x00;
-    return 0;
-}
-
-int LEDCube::SetPixel(int x, int y, int z, bool state=true) {
-    if (state) {
-        data[y][x] |= 1 << z;
-    } else {
-        data[y][x] &= ~(1 << z);
-    }
-    return 0;
-}
+#include "LEDCube.h"
 
 int main(void) {
     //TCCR0 |= (1<<CS00);
@@ -53,15 +12,63 @@ int main(void) {
     //// enable global interrupts
     //sei();
 
-    LEDCube cube;
+    Cube::LEDCube cube;
 
+    int delay_counter = 100;
+    int counter = 0;
+    int current_element = 0;
+    int pos = 0;
+    int direction = 1;
+    cube.SetLayer(0);
+    cube.SetLayer(4);
+    int top[13] =    { 5,  2, 14, 21, 10, 17, 23,  8,  9,  7,  0, 4,  6};
+    int bottom[13] = {-1, 24,  1, 18, 13, 12, 15, 22, 20, 16, 19, 3, 11};
+
+    for(int i=0; i<12; i++) {
+        cube.SetPixel(4, top[i], false);
+    }
+    for(int i=0; i<12; i++) {
+        cube.SetPixel(0, bottom[i], false);
+    }
+
+    int i = 0;
     while(1) {
-        cube.SetPixel(0, 0, 3);
-        cube.SetPixel(0, 0, 4);
-        cube.SetPixel(0, 0, 2);
-        cube.SetPixel(4, 4, 1);
-        cube.SetPixel(2, 1, 4);
-        cube.SetPixel(0, 0, 3, false);
+
+        counter++;
+        counter = counter % 2;
+        if (!counter) {
+            if (delay_counter > 0) {
+                delay_counter--;
+                continue;
+            }
+            if (direction == 1) {
+                cube.SetPixel(pos, top[current_element], false);
+                pos += direction;
+                cube.SetPixel(pos, top[current_element], true);
+            }
+            else {
+                cube.SetPixel(pos, bottom[current_element], false);
+                pos += direction;
+                cube.SetPixel(pos, bottom[current_element], true);
+            }
+            if (pos == 4 || pos == 0) {
+                if (direction == 1) {
+                    bottom[current_element] = top[current_element];
+                    top[current_element] = -1;
+                }
+                else {
+                    top[current_element] = bottom[current_element];
+                    bottom[current_element] = -1;
+                }
+                direction = direction == 1 ? -1 : 1;
+                delay_counter = 30;
+                current_element++;
+                current_element = current_element % 13;
+            }
+            cube.Show();
+            cube.Draw();
+        }
+        cube.Show();
         cube.Draw();
     }
 
