@@ -11,9 +11,11 @@ namespace Cube {
             LEDCube();
             int Clear();
             int Draw();
-            int SetLayer(int layer);
+            //int Normalize(int &x, int &y, int &z);
+            int SetLayer(int layer, bool state=true);
             int SetPixel(int x, int y, int z, bool state=true);
             int SetPixel(int layer, int pos, bool state=true);
+            int Shift(int x, int y, int z);
             int Show();
 
         private:
