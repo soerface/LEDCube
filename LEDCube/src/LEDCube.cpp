@@ -40,7 +40,7 @@ namespace Cube {
     }
 
     int LEDCube::SetPixel(int x, int y, int z, bool state) {
-        if (x > 4 || y > 4 || z > 4) {
+        if (x > 4 || y > 4 || z > 4 || x < 0 || y < 0 || z < 0) {
             return -1;
         }
         if (state) {
@@ -52,7 +52,7 @@ namespace Cube {
     }
 
     int LEDCube::SetPixel(int layer, int pos, bool state) {
-        if (layer > 4 || pos > 24) {
+        if (layer > 4 || pos > 24 || layer < 0 || pos < 0) {
             return -1;
         }
         int x = pos % 5;
@@ -60,13 +60,21 @@ namespace Cube {
         return SetPixel(x, layer, z, state);
     }
 
+    int LEDCube::SetPixel(int pos, bool state) {
+        if (pos < 0) {
+            pos = 125 - pos;
+        }
+        pos = pos % 125;
+        int layer = pos / 25;
+        pos = pos % 25;
+        return SetPixel(layer, pos, state);
+    }
+
     int LEDCube::Shift(int x, int y, int z) {
-        /*
         if (x < -5 || y < -5 || z < -5 ||
             x > 5 || y > 5 || z > 5) {
             return -1;
         }
-        */
         if (x < 0) {
             x = 5 + x;
         }
@@ -78,15 +86,13 @@ namespace Cube {
         }
         for (int i=0; i<5; i++) {
             for (int j=0; j<5; j++) {
-                for (int k=0; k<5; k++) {
-                    int pattern = data_buf[i][j];
-                    for (int l=0; l<z; l++) {
-                        int tmp = (pattern & 0x10) >> 4;
-                        pattern = pattern << 1;
-                        pattern |= tmp;
-                    }
-                    data[(i + x) % 5][(j + y) % 5] = pattern;
+                int pattern = data_buf[i][j];
+                for (int l=0; l<z; l++) {
+                    int tmp = (pattern & 0x10) >> 4;
+                    pattern = pattern << 1;
+                    pattern |= tmp;
                 }
+                data[(i + x) % 5][(j + y) % 5] = pattern;
             }
         }
         memcpy(data_buf, data, sizeof(data));

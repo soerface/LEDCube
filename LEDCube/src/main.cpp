@@ -1,8 +1,4 @@
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include <util/delay.h>
-
-#include "LEDCube.h"
+#include "main.h"
 
 int main(void) {
     //TCCR0 |= (1<<CS00);
@@ -14,22 +10,41 @@ int main(void) {
 
     Cube::LEDCube cube;
 
-    cube.SetLayer(0);
-
     cube.Show();
 
-    int counter = 0;
+    int frame = 0;
+    int current_animation = 1;
     while(1) {
-        counter++;
-        counter = counter % 30;
-        if (!counter) {
-            cube.Shift(0, 1, 0);
-            cube.SetLayer(0, true);
-            cube.Show();
+        frame++;
+        frame = frame % 15;
+        if (!frame) {
+            switch (current_animation) {
+                case 0:
+                    animation_rain(cube);
+                    break;
+                case 1:
+                    animation_tetris(cube);
+                    break;
+            }
         }
         cube.Draw();
     }
+}
 
+int animation_rain(Cube::LEDCube &cube) {
+    cube.SetLayer(4, false);
+    cube.Shift(0, 1, 0);
+    int i = rand() % 25;
+    cube.SetPixel(i);
+    cube.Show();
+    return 0;
+}
+
+int animation_tetris(Cube::LEDCube &cube) {
+    int i = rand() % 25;
+    cube.SetPixel(i);
+    cube.Show();
+    return 0;
 }
 
 ISR(TIMER0_OVF_vect) {
