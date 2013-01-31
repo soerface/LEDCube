@@ -16,7 +16,7 @@ int main(void) {
     int current_animation = 1;
     while(1) {
         frame++;
-        frame = frame % 15;
+        frame = frame % 5;
         if (!frame) {
             switch (current_animation) {
                 case 0:
@@ -41,8 +41,14 @@ int animation_rain(Cube::LEDCube &cube) {
 }
 
 int animation_tetris(Cube::LEDCube &cube) {
-    int i = rand() % 25;
-    cube.SetPixel(i);
+    //int i = rand() % 25;
+    static int i = 0;
+    cube.SetPixel(0, i);
+    i++;
+    i %= 25;
+    if (i == 0) {
+        cube.Shift(0, 1, 0);
+    }
     cube.Show();
     return 0;
 }

@@ -2,6 +2,8 @@
 
 namespace Cube {
 
+    // public
+
     LEDCube::LEDCube() {
         DDRA = 0x1F;
         DDRB = 0x1F;
@@ -39,10 +41,25 @@ namespace Cube {
         return 0;
     }
 
+    bool LEDCube::GetPixel(int x, int y, int z) {
+        PositionToCoordinates(x, y, z);
+        return data_buf[x][y] & 1 << z;
+    }
+
+    bool LEDCube::GetPixel(int layer, int pos) {
+        int x, y, z;
+        PositionToCoordinates(x, y, z, layer, pos);
+        return GetPixel(x, y, z);
+    }
+
+    bool LEDCube::GetPixel(int pos) {
+        int x, y, z;
+        PositionToCoordinates(x, y, z, pos);
+        return GetPixel(x, y, z);
+    }
+
     int LEDCube::SetPixel(int x, int y, int z, bool state) {
-        if (x > 4 || y > 4 || z > 4 || x < 0 || y < 0 || z < 0) {
-            return -1;
-        }
+        PositionToCoordinates(x, y, z);
         if (state) {
             data_buf[x][y] |= 1 << z;
         } else {
@@ -52,22 +69,15 @@ namespace Cube {
     }
 
     int LEDCube::SetPixel(int layer, int pos, bool state) {
-        if (layer > 4 || pos > 24 || layer < 0 || pos < 0) {
-            return -1;
-        }
-        int x = pos % 5;
-        int z = pos / 5;
-        return SetPixel(x, layer, z, state);
+        int x, y, z;
+        PositionToCoordinates(x, y, z, layer, pos);
+        return SetPixel(x, y, z, state);
     }
 
     int LEDCube::SetPixel(int pos, bool state) {
-        if (pos < 0) {
-            pos = 125 - pos;
-        }
-        pos = pos % 125;
-        int layer = pos / 25;
-        pos = pos % 25;
-        return SetPixel(layer, pos, state);
+        int x, y, z;
+        PositionToCoordinates(x, y, z, pos);
+        return SetPixel(x, y, z, state);
     }
 
     int LEDCube::Shift(int x, int y, int z) {
@@ -101,6 +111,52 @@ namespace Cube {
 
     int LEDCube::Show() {
         memcpy(data, data_buf, sizeof(data));
+        return 0;
+    }
+
+    // private
+
+    int LEDCube::PositionToCoordinates(int &x, int &y, int &z, int layer, int pos) {
+        if (layer > 4 || pos > 24) {
+            return -1;
+        }
+        if (pos < 0) {
+            pos = 25 - pos;
+        }
+        if (layer < 0) {
+            layer = 5 - layer;
+        }
+        x = pos % 5;
+        y = layer;
+        z = pos / 5;
+        return 0;
+    }
+
+    int LEDCube::PositionToCoordinates(int &x, int &y, int &z, int pos) {
+        if (pos < 0) {
+            pos = 125 - pos;
+        }
+        pos = pos % 125;
+        y = pos / 25;
+        pos = pos % 25;
+        x = pos % 5;
+        z = pos / 5;
+        return 0;
+    }
+
+    int LEDCube::PositionToCoordinates(int &x, int &y, int &z) {
+        if (x > 4 || y > 4 || z > 4 || x < -4 || y < -4 || z < -4) {
+            return -1;
+        }
+        if (x < 0) {
+            x += 5;
+        }
+        if (y < 0) {
+            y += 5;
+        }
+        if (z < 0) {
+            z += 5;
+        }
         return 0;
     }
 }
