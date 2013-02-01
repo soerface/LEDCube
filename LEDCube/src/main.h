@@ -9,6 +9,7 @@
 
 int main(void);
 int animation_rain(Cube::LEDCube &cube);
+int animation_sparkles(Cube::LEDCube &cube);
 int animation_tetris(Cube::LEDCube &cube);
 int animation_top_down(Cube::LEDCube &cube);
 int animation_wireframe(Cube::LEDCube &cube);

@@ -17,13 +17,14 @@ int main(void) {
     int frame = 0;
     int current_animation = 0;
     int animation_counter = 0;
-    int (*animations[4]) (Cube::LEDCube &cube) = {
+    int (*animations[5]) (Cube::LEDCube &cube) = {
+        animation_sparkles,
         animation_top_down,
         animation_wireframe,
         animation_tetris,
         animation_rain,
     };
-    int animation_delays[4] = {5, 40, 30, 25};
+    int animation_delays[5] = {40, 5, 40, 30, 25};
     while(1) {
         frame++;
         frame = frame % animation_delays[current_animation];
@@ -33,7 +34,7 @@ int main(void) {
             animation_counter %= (2500 / animation_delays[current_animation]);
             if (!animation_counter) {
                 current_animation++;
-                current_animation %= 4;
+                current_animation %= 5;
                 init = false;
                 cube.Clear();
                 cube.Show();
@@ -41,6 +42,26 @@ int main(void) {
         }
         cube.Draw();
     }
+}
+
+int animation_sparkles(Cube::LEDCube &cube) {
+    static int start;
+    static int end;
+    if (!init) {
+        start = 0;
+        end = 5;
+        init = true;
+    }
+    cube.Clear();
+    for (int i=start % 5; i<end; i+=3) {
+        cube.SetPixel(i);
+    }
+    start++;
+    end += 5;
+    if (end > 125) {
+        end = 125;
+    }
+    cube.Show();
 }
 
 int animation_rain(Cube::LEDCube &cube) {
