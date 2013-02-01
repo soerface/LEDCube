@@ -20,16 +20,43 @@ namespace Cube {
     }
 
     int LEDCube::Draw() {
+        bool next_differs;
+        static bool last_differs = true;
+        bool next_used;
         for (int Layer=0; Layer<5; Layer++) {
+            next_differs = false;
+            next_used = false;
             // generate pattern for one layer
             for (int Row=0; Row<5; Row++) {
                 PORTD = 1 << Row;
                 PORTA = data[Row][Layer];
+                if (Layer < 4) {
+                    if (data[Row][Layer] != data[Row][Layer+1]) {
+                        next_differs = true;
+                    }
+                    if (data[Row][Layer+1]) {
+                        next_used = true;
+                    }
+                } else {
+                    if (data[Row][Layer] != data[Row][0]) {
+                        next_differs = true;
+                    }
+                    if (data[Row][0]) {
+                        next_used = true;
+                    }
+                }
             }
             // show the layer for a short period of time
-            PORTB = 1 << Layer;
+            if (last_differs) {
+                PORTB = 1 << Layer;
+            } else {
+                PORTB |= 1 << Layer;
+            }
             _delay_ms(1);
-            PORTB = 0x00;
+            if (next_differs && next_used) {
+                PORTB = 0x00;
+            }
+            last_differs = next_differs;
         }
         return 0;
     }

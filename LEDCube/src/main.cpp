@@ -17,14 +17,16 @@ int main(void) {
     int frame = 0;
     int current_animation = 0;
     int animation_counter = 0;
-    int (*animations[5]) (Cube::LEDCube &cube) = {
+    int (*animations[7]) (Cube::LEDCube &cube) = {
+        animation_blink,
+        animation_run,
         animation_sparkles,
         animation_top_down,
         animation_wireframe,
         animation_tetris,
         animation_rain,
     };
-    int animation_delays[5] = {40, 5, 40, 30, 25};
+    int animation_delays[7] = {100, 5, 40, 5, 40, 30, 25};
     while(1) {
         frame++;
         frame = frame % animation_delays[current_animation];
@@ -34,7 +36,7 @@ int main(void) {
             animation_counter %= (2500 / animation_delays[current_animation]);
             if (!animation_counter) {
                 current_animation++;
-                current_animation %= 5;
+                current_animation %= 6;
                 init = false;
                 cube.Clear();
                 cube.Show();
@@ -42,6 +44,37 @@ int main(void) {
         }
         cube.Draw();
     }
+}
+
+int animation_blink(Cube::LEDCube &cube) {
+    static bool state = true;
+    if (state) {
+        for (int i=0; i<5; i++) {
+            cube.SetLayer(i);
+        }
+    } else {
+        cube.Clear();
+    }
+    state ^= 1;
+    cube.Show();
+}
+
+int animation_rain(Cube::LEDCube &cube) {
+    cube.SetLayer(4, false);
+    cube.Shift(0, 1, 0);
+    int i = rand() % 25;
+    cube.SetPixel(i);
+    cube.Show();
+    return 0;
+}
+
+int animation_run(Cube::LEDCube &cube) {
+    static int pos = 0;
+    cube.Clear();
+    cube.SetPixel(pos % 125);
+    //cube.SetPixel((pos - 1) % 125, false);
+    pos++;
+    cube.Show();
 }
 
 int animation_sparkles(Cube::LEDCube &cube) {
@@ -62,15 +95,6 @@ int animation_sparkles(Cube::LEDCube &cube) {
         end = 125;
     }
     cube.Show();
-}
-
-int animation_rain(Cube::LEDCube &cube) {
-    cube.SetLayer(4, false);
-    cube.Shift(0, 1, 0);
-    int i = rand() % 25;
-    cube.SetPixel(i);
-    cube.Show();
-    return 0;
 }
 
 int animation_tetris(Cube::LEDCube &cube) {

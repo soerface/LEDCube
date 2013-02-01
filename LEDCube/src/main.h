@@ -8,7 +8,9 @@
 #include "LEDCube.h"
 
 int main(void);
+int animation_blink(Cube::LEDCube &cube);
 int animation_rain(Cube::LEDCube &cube);
+int animation_run(Cube::LEDCube &cube);
 int animation_sparkles(Cube::LEDCube &cube);
 int animation_tetris(Cube::LEDCube &cube);
 int animation_top_down(Cube::LEDCube &cube);
