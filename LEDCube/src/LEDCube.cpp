@@ -28,7 +28,7 @@ namespace Cube {
             }
             // show the layer for a short period of time
             PORTB = 1 << Layer;
-            _delay_ms(2);
+            _delay_ms(1);
             PORTB = 0x00;
         }
         return 0;
@@ -47,13 +47,17 @@ namespace Cube {
     }
 
     bool LEDCube::GetPixel(int layer, int pos) {
-        int x, y, z;
+        int x = 0;
+        int y = 0;
+        int z = 0;
         PositionToCoordinates(x, y, z, layer, pos);
         return GetPixel(x, y, z);
     }
 
     bool LEDCube::GetPixel(int pos) {
-        int x, y, z;
+        int x = 0;
+        int y = 0;
+        int z = 0;
         PositionToCoordinates(x, y, z, pos);
         return GetPixel(x, y, z);
     }
@@ -69,7 +73,9 @@ namespace Cube {
     }
 
     int LEDCube::SetPixel(int layer, int pos, bool state) {
-        int x, y, z;
+        int x = 0;
+        int y = 0;
+        int z = 0;
         PositionToCoordinates(x, y, z, layer, pos);
         return SetPixel(x, y, z, state);
     }

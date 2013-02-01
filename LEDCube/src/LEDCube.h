@@ -1,4 +1,4 @@
-#define F_CPU 1000000
+#define F_CPU 16000000
 #include <string.h>
 #include <avr/io.h>
 #include <util/delay.h>
