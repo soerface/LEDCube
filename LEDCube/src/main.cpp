@@ -17,16 +17,17 @@ int main(void) {
     int frame = 0;
     int current_animation = 0;
     int animation_counter = 0;
-    int (*animations[7]) (Cube::LEDCube &cube) = {
+    int (*animations[8]) (Cube::LEDCube &cube) = {
+        animation_top_down2,
+        animation_top_down,
         animation_blink,
         animation_run,
         animation_sparkles,
-        animation_top_down,
         animation_wireframe,
         animation_tetris,
         animation_rain,
     };
-    int animation_delays[7] = {100, 5, 40, 5, 40, 30, 25};
+    int animation_delays[8] = {4, 5, 100, 5, 40, 40, 30, 25};
     while(1) {
         frame++;
         frame = frame % animation_delays[current_animation];
@@ -36,13 +37,23 @@ int main(void) {
             animation_counter %= (2500 / animation_delays[current_animation]);
             if (!animation_counter) {
                 current_animation++;
-                current_animation %= 6;
+                current_animation %= 7;
                 init = false;
                 cube.Clear();
                 cube.Show();
             }
         }
         cube.Draw();
+    }
+}
+
+int shuffle(int data[], int size) {
+    for (int i=0; i<25; i++) {
+        int pos1 = rand() % size;
+        int pos2 = rand() % size;
+        int tmp = data[pos1];
+        data[pos1] = data[pos2];
+        data[pos2] = tmp;
     }
 }
 
@@ -117,7 +128,6 @@ int animation_top_down(Cube::LEDCube &cube) {
     static int counter;
     static int delay;
     static int index;
-    static int max_index;
     static bool dir;
     if (!init) {
         dir = true;
@@ -133,7 +143,6 @@ int animation_top_down(Cube::LEDCube &cube) {
             pixels[layer][layer_counter[layer]] = i;
             layer_counter[layer]++;
         }
-        max_index = layer_counter[0] < layer_counter[1] ? layer_counter[0] : layer_counter[1];
         cube.Show();
         init = true;
     }
@@ -155,11 +164,56 @@ int animation_top_down(Cube::LEDCube &cube) {
     if (counter == 4) {
         pixels[dir ? 1 : 0][index] = pixel;
         index++;
-        index %= max_index;
+        index %= 11;
         counter = 0;
         dir = !dir;
         delay = 10;
     }
+    return 0;
+}
+
+int animation_top_down2(Cube::LEDCube &cube) {
+    static bool dir;
+    static int counter;
+    static int delay;
+    static int data[25];
+    static int index;
+    if (!init) {
+        counter = 0;
+        delay = 10;
+        dir = false;
+        cube.SetLayer(4);
+        index = 0;
+        for (int i=0; i<25; i++) {
+            data[i] = i;
+        }
+        shuffle(data, 25);
+        init = true;
+    }
+    if (delay) {
+        delay--;
+        return 0;
+    }
+    if (dir) {
+        cube.SetPixel(counter, data[index], false);
+        counter++;
+        cube.SetPixel(counter, data[index], true);
+    } else {
+        cube.SetPixel(4 - counter, data[index], false);
+        counter++;
+        cube.SetPixel(4 - counter, data[index], true);
+    }
+    if (counter == 4) {
+        index++;
+        counter = 0;
+        if (index == 25) {
+            delay = 20;
+            index = 0;
+            shuffle(data, 25);
+            dir = !dir;
+        }
+    }
+    cube.Show();
     return 0;
 }
 
